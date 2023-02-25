@@ -1,0 +1,138 @@
+---
+title: "Data Visualization Examples"
+author: "Erica Bishop"
+date: "`r Sys.Date()`"
+output: html_document
+---
+# Data Visualization Examples
+
+Below are examples of visualizations taken from my various coursework. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(spData)
+library(leaflegend)
+library(leaflet)
+library(tidyverse)
+library(patchwork)
+
+```
+
+## Investigating spotify data with ggplot
+
+These ggplots are from the same spotify data wrangled in bishop_data_wrangling.RMD. The goal of the visualization below was to quickly compare the difference in means across multiple features between two three user classifications - songs in my saved track lists on spotify, songs in a classmate's saved track list, and songs we had in common.
+
+```{r echo=FALSE}
+#read in data
+eb_ja_tracks <- read_csv(here::here("eb_ja_tracks.csv"))
+
+```
+
+```{r}
+
+#compare danceability
+dance_plot <- ggplot(data = eb_ja_tracks,
+       aes(y = danceability,
+           x = user,
+           col = user)) +
+  geom_boxplot() +
+  labs(title = "Danceability") +
+  theme_minimal() +
+  theme(
+    axis.title.x = element_blank()
+  )
+
+#compare energy
+energy_plot <- ggplot(data = eb_ja_tracks,
+       aes(y = energy,
+           x = user,
+           col = user)) +
+  geom_boxplot() +
+  labs(title = "Energy") +
+  theme_minimal() +
+  theme(
+    axis.title.x = element_blank()
+  )
+
+#compare key
+key_plot <- ggplot(data = eb_ja_tracks,
+       aes(y = key,
+           x = user,
+           col = user)) +
+  geom_boxplot() +
+  labs(title = "Key") +
+  theme_minimal() +
+  theme(
+    axis.title.x = element_blank()
+  )
+
+#compare valence
+valence_plot <- ggplot(data = eb_ja_tracks,
+       aes(y = valence,
+           x = user,
+           col = user)) +
+  geom_boxplot() +
+  labs(title = "Valence") +
+  theme_minimal() +
+  theme(
+    axis.title.x = element_blank()
+  )
+
+#compare tempo
+tempo_plot <- ggplot(data = eb_ja_tracks,
+       aes(y = tempo,
+           x = user,
+           col = user)) +
+  geom_boxplot() +
+  labs(title = "Tempo") +
+  theme_minimal() +
+  theme(
+    axis.title.x = element_blank()
+  )
+
+#compare mode
+mode_plot <- ggplot(data = eb_ja_tracks,
+       aes(y = loudness,
+           x = user,
+           col = user)) +
+  geom_boxplot() +
+  labs(title = "Loudness") +
+  theme_minimal() +
+  theme(
+    axis.title.x = element_blank()
+  )
+
+
+var_compare_plot <- dance_plot + energy_plot + key_plot + valence_plot + tempo_plot + mode_plot +
+  plot_layout(guides = 'collect')
+
+var_compare_plot
+
+```
+
+## Spatial data visualization with `leaflet`
+
+The map below shows the world population by country using the `world` data from the `spData` package.
+
+```{r}
+
+pal = colorNumeric(palette = "PuRd", domain = world$pop) #create a color palette
+
+leaflet(data = world) |> #add data
+  addPolygons(data = world,
+              color = ~pal(pop), #color by population
+              fillOpacity = 0.5) |>
+  addProviderTiles(providers$OpenStreetMap) |> #add known basemap
+  addPolygons(weight = 0.5,
+              color = "black") |> 
+  addLegendNumeric(pal = pal, #create more intuitive legend
+            values = ~pop,
+            position = 'topright',
+            title = "Population",
+            decreasing = TRUE
+            ) |> 
+  setView(lng = -120, lat = 47, zoom = 3) #toggle where map view starts and zoom
+  
+
+```
